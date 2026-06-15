@@ -419,19 +419,40 @@ end
 -- a small center dot marks the exact action point under
 -- any tool cursor
 
+-- cursor outlines are drawn twice -- a thick light pass
+-- under a thin dark pass -- so the pointer stays visible
+-- on any background or drawing
+
+function strokeRing(r)
+  gfx.setColor(Color[BRIGHT_WHITE])
+  gfx.setLineWidth(3)
+  gfx.circle("line", mx, my, r)
+  gfx.setColor(Color[Color.black])
+  gfx.setLineWidth(1)
+  gfx.circle("line", mx, my, r)
+end
+
+function strokeBox(r)
+  gfx.setColor(Color[BRIGHT_WHITE])
+  gfx.setLineWidth(3)
+  gfx.rectangle("line", mx - r, my - r, r * 2, r * 2)
+  gfx.setColor(Color[Color.black])
+  gfx.setLineWidth(1)
+  gfx.rectangle("line", mx - r, my - r, r * 2, r * 2)
+end
+
 function drawHotspot()
+  gfx.setColor(Color[BRIGHT_WHITE])
+  gfx.circle("fill", mx, my, 2)
   gfx.setColor(Color[Color.black])
   gfx.circle("fill", mx, my, 1)
-  gfx.setColor(Color[BRIGHT_WHITE])
-  gfx.circle("fill", mx, my, 0.5)
 end
 
 -- brush cursor: a ring the size of the stroke (PS brush)
 
 function brushCursor()
   if inCanvasRange(mx, my) then
-    gfx.setColor(Color[BRIGHT_WHITE])
-    gfx.circle("line", mx, my, getWeight())
+    strokeRing(getWeight())
     drawHotspot()
   end
 end
@@ -440,18 +461,24 @@ end
 
 function eraserCursor()
   if inCanvasRange(mx, my) then
-    local r = getWeight()
-    gfx.setColor(Color[Color.black])
-    gfx.rectangle("line", mx - r, my - r, r * 2, r * 2)
+    strokeBox(getWeight())
     drawHotspot()
   end
 end
 
+function crossArm(x1, y1, x2, y2)
+  gfx.setColor(Color[BRIGHT_WHITE])
+  gfx.setLineWidth(3)
+  gfx.line(x1, y1, x2, y2)
+  gfx.setColor(Color[Color.black])
+  gfx.setLineWidth(1)
+  gfx.line(x1, y1, x2, y2)
+end
+
 function drawCrosshair()
   local d = CROSS_D
-  gfx.setColor(Color[Color.black])
-  gfx.line(mx - d, my, mx + d, my)
-  gfx.line(mx, my - d, mx, my + d)
+  crossArm(mx - d, my, mx + d, my)
+  crossArm(mx, my - d, mx, my + d)
 end
 
 -- sticker cursor: held preview, else a crosshair marking
@@ -479,7 +506,9 @@ function drawCursor()
     gfx.polygon("fill", CURSOR_TRIS[i])
   end
   gfx.setColor(Color[Color.black])
+  gfx.setLineWidth(2)
   gfx.polygon("line", CURSOR_PTS)
+  gfx.setLineWidth(1)
   gfx.pop()
 end
 
@@ -860,7 +889,7 @@ function love.mousemoved(_, _, dx, dy)
   mx = clampAxis(mx + (dx * POINTER_SPEED), WIDTH)
   my = clampAxis(my + (dy * POINTER_SPEED), HEIGHT)
   if not inCanvasRange(mx, my) then
-    return
+    return 
   end
   if stroke then
     extendStroke(mx, my)
@@ -886,7 +915,7 @@ function cycleTool()
   for i = 1, n do
     if preset.tools[i] == tool then
       tool = preset.tools[(i % n) + 1]
-      return
+      return 
     end
   end
 end
@@ -931,10 +960,10 @@ end
 function escapePressed()
   if Key.ctrl() then
     love.mouse.setRelativeMode(false)
-    return
+    return 
   end
   if not Key.shift() then
-    return
+    return 
   end
   if screen == "engine" then
     enterMenu()
@@ -948,7 +977,7 @@ end
 
 CHORDS = {
   down = notchDown,
-  up = notchUp,
+  up = notchUp
 }
 
 function chordKey(k)
@@ -958,9 +987,7 @@ function chordKey(k)
   end
 end
 
-CTRL_KEYS = {
-  z = doUndo,
-}
+CTRL_KEYS = { z = doUndo }
 
 function ctrlKey(k)
   local action = CTRL_KEYS[k]
@@ -982,7 +1009,7 @@ end
 function love.keypressed(k)
   if k == "escape" then
     escapePressed()
-    return
+    return 
   end
   if screen == "engine" then
     engineKey(k)

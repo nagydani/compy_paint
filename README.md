@@ -144,22 +144,22 @@ remove one, erase it.
 
 ### Undo and clear
 
-`Ctrl+Z` undoes one step: it restores the last clear, or drops
-the last object. The trash button at the bottom of the column
-clears the picture — and because clearing must be undoable, the
-model saves the old list **by reference**:
+`Ctrl+Z` undoes one step (depth 1). The model records the last
+reversible action in a single stash and replays its inverse:
 
 ```lua
-function clearPicture()
-  cleared = objects
-  objects = {}
-end
+undone = { act = "erase", at = i, obj = o }
 ```
 
-Lua tables are not copied on assignment, so this costs nothing
-regardless of picture size; undo swaps the array back. Any new
-object supersedes the stash, and the garbage collector reclaims
-the old picture once nothing references it.
+* **add** (a stroke or sticker) — drop the last object
+* **erase** — reinsert the removed object at its old index, so
+  undoing an erase brings *that* object back, not some other
+* **clear** — restore the whole list (saved by reference, since
+  Lua does not copy tables on assignment, so it costs nothing)
+
+Any new action overwrites the stash, so a second undo in a row
+does nothing. The garbage collector reclaims whatever the stash
+no longer references.
 
 ### Input
 

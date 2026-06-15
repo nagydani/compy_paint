@@ -10,9 +10,11 @@ objects = { }
 
 stroke = nil
 
--- the last cleared picture, kept for undo
+-- the last reversible action, kept for one-step undo (spec):
+-- { act = "add" } | { act = "erase", at, obj } |
+-- { act = "clear", list }
 
-cleared = nil
+undone = nil
 
 function beginStroke(x, y, c, w)
   stroke = {
@@ -39,35 +41,60 @@ function strokePoint(x, y)
   stroke.y2 = math.max(stroke.y2, y)
 end
 
+function markAdd()
+  undone = { act = "add" }
+end
+
 function commitStroke()
   objects[#objects + 1] = stroke
   stroke = nil
-  cleared = nil
+  markAdd()
 end
 
 function clearObjects()
   objects = { }
   stroke = nil
-  cleared = nil
+  undone = nil
 end
 
 -- saves the array by reference: Lua tables are not
 -- copied on assignment, and undo swaps it back
 
 function clearPicture()
-  cleared = objects
+  undone = {
+    act = "clear",
+    list = objects
+  }
   objects = { }
 end
 
--- depth 1 (spec): one step back -- restore the last clear,
--- otherwise drop the last object
+-- undo handlers, one per recorded action (spec: depth 1)
+
+function undoAdd()
+  objects[#objects] = nil
+end
+
+function undoErase(u)
+  table.insert(objects, u.at, u.obj)
+end
+
+function undoClear(u)
+  objects = u.list
+end
+
+UNDO = {
+  add = undoAdd,
+  erase = undoErase,
+  clear = undoClear
+}
+
+-- one step back: replay the inverse of the last action,
+-- then drop the stash so a second undo does nothing
 
 function undo()
-  if cleared then
-    objects = cleared
-    cleared = nil
-  else
-    objects[#objects] = nil
+  if undone then
+    UNDO[undone.act](undone)
+    undone = nil
   end
 end
 
@@ -79,7 +106,7 @@ function stickerBox(o, half)
 end
 
 function addSticker(id, x, y, half)
-  cleared = nil
+  markAdd()
   local o = {
     kind = "sticker",
     id = id,
@@ -172,5 +199,10 @@ function topmostAt(x, y, r)
 end
 
 function removeObject(i)
+  undone = {
+    act = "erase",
+    at = i,
+    obj = objects[i]
+  }
   table.remove(objects, i)
 end
