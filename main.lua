@@ -10,7 +10,7 @@ require("stickers")
 
 -- the star sticker doubles as the sticker-tool icon
 
-STAR_ID = stickerIndex("star")
+STAR_ID = STICKER_INDEX["star"]
 
 -- pen-and-paper (spec #18): all event handlers run inside
 -- the framework's use_canvas, so the picture lives on the
@@ -175,12 +175,6 @@ function drawEraser(cx, cy)
   beginIcon(cx, cy, ICON_D / ICON_BASE)
   drawEraserBody()
   gfx.pop()
-end
-
--- a sticker's on-canvas footprint in px at a given scale
-
-function stickerPx(id, scale)
-  return STICKERS[id].size * scale
 end
 
 function drawSticker(i, cx, cy, d)
@@ -497,7 +491,7 @@ end
 
 function stickerCursor()
   if held then
-    drawSticker(held, mx, my, stickerPx(held, held_scale))
+    drawSticker(held, mx, my, STICKER_SIZE * held_scale)
   elseif inCanvasRange(mx, my) then
     drawCrosshair()
   end
@@ -692,7 +686,7 @@ function drawObjectStroke(o)
 end
 
 function drawObjectSticker(o)
-  drawSticker(o.id, o.x, o.y, stickerPx(o.id, o.scale))
+  drawSticker(o.id, o.x, o.y, STICKER_SIZE * o.scale)
 end
 
 DRAW_OBJECT = {
@@ -726,7 +720,7 @@ function love.wheelmoved(_, dy)
 end
 
 function placeSticker(i, x, y, scale)
-  local half = stickerPx(i, scale) / 2
+  local half = (STICKER_SIZE * scale) / 2
   addSticker(i, x, y, half, scale)
   drawObjectSticker(objects[#objects])
 end
@@ -744,7 +738,7 @@ end
 function applySeeds()
   for i = 1, #SEEDS do
     local s = SEEDS[i]
-    placeSticker(stickerIndex(s.id), s.x + COL_W, s.y, 1)
+    placeSticker(STICKER_INDEX[s.id], s.x + COL_W, s.y, 1)
   end
 end
 

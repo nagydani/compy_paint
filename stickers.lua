@@ -121,29 +121,21 @@ function drawCloudSticker(d)
 end
 
 STICKER_SIZE = 96
-STICKERS = { }
 
-function defineSticker(id, draw)
-  STICKERS[#STICKERS + 1] = {
-    id = id,
-    size = STICKER_SIZE,
-    draw = draw
-  }
-end
+STICKERS = {
+  { id = "circle", draw = drawCircleSticker },
+  { id = "square", draw = drawSquareSticker },
+  { id = "star", draw = drawStarSticker },
+  { id = "tree", draw = drawTreeSticker },
+  { id = "house", draw = drawHouseSticker },
+  { id = "sun", draw = drawSunSticker },
+  { id = "flower", draw = drawFlowerSticker },
+  { id = "cloud", draw = drawCloudSticker }
+}
 
-defineSticker("circle", drawCircleSticker)
-defineSticker("square", drawSquareSticker)
-defineSticker("star", drawStarSticker)
-defineSticker("tree", drawTreeSticker)
-defineSticker("house", drawHouseSticker)
-defineSticker("sun", drawSunSticker)
-defineSticker("flower", drawFlowerSticker)
-defineSticker("cloud", drawCloudSticker)
+-- id -> index, built once so lookups are direct, not a scan
 
-function stickerIndex(id)
-  for i = 1, #STICKERS do
-    if STICKERS[i].id == id then
-      return i
-    end
-  end
+STICKER_INDEX = { }
+for i = 1, #STICKERS do
+  STICKER_INDEX[STICKERS[i].id] = i
 end
