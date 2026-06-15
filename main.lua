@@ -10,7 +10,7 @@ require("stickers")
 
 -- the star sticker doubles as the sticker-tool icon
 
-STAR_ID = STICKER_INDEX["star"]
+STAR_ID = STK_STAR
 
 -- pen-and-paper (spec #18): all event handlers run inside
 -- the framework's use_canvas, so the picture lives on the
@@ -116,22 +116,27 @@ end
 
 -- flame tip of the brush icon, rendered once at load
 
-BRUSH_TIP = love.math.newBezierCurve(
-  -12,
-  12,
-  -15,
-  20,
-  -5,
-  30,
-  0,
-  35,
-  5,
-  30,
-  15,
-  20,
-  12,
-  12
-):render()
+-- flame tip of the brush icon: editable control points
+-- (x, y pairs), rendered to a polygon once at load
+
+-- append an x, y pair to a flat coordinate table
+
+function pushXY(t, x, y)
+  t[#t + 1] = x
+  t[#t + 1] = y
+end
+
+BRUSH_TIP_PTS = { }
+
+pushXY(BRUSH_TIP_PTS, -12, 12)
+pushXY(BRUSH_TIP_PTS, -15, 20)
+pushXY(BRUSH_TIP_PTS, -5, 30)
+pushXY(BRUSH_TIP_PTS, 0, 35)
+pushXY(BRUSH_TIP_PTS, 5, 30)
+pushXY(BRUSH_TIP_PTS, 15, 20)
+pushXY(BRUSH_TIP_PTS, 12, 12)
+
+BRUSH_TIP = love.math.newBezierCurve(BRUSH_TIP_PTS):render()
 
 function drawBrushHandle()
   gfx.setColor(0.6, 0.4, 0.2)
@@ -180,7 +185,7 @@ end
 function drawSticker(i, cx, cy, d)
   gfx.push()
   gfx.translate(cx, cy)
-  STICKERS[i].draw(d)
+  STICKERS[i](d)
   gfx.pop()
 end
 
@@ -342,32 +347,27 @@ MODE_CONTROLS = {
 
 -- goose marker for the selected weight, drawn around y = 0
 
-GOOSE_SHAPE = {
-  2 * MARGIN, -MARGIN / 2,
-  2 * MARGIN, MARGIN / 2,
-  7 * MARGIN, MARGIN / 2,
-  7 * MARGIN, MARGIN,
-  9 * MARGIN, 0,
-  7 * MARGIN, -MARGIN,
-  7 * MARGIN, -MARGIN / 2
-}
+GOOSE_SHAPE = { }
+
+pushXY(GOOSE_SHAPE, 2 * MARGIN, -MARGIN / 2)
+pushXY(GOOSE_SHAPE, 2 * MARGIN, MARGIN / 2)
+pushXY(GOOSE_SHAPE, 7 * MARGIN, MARGIN / 2)
+pushXY(GOOSE_SHAPE, 7 * MARGIN, MARGIN)
+pushXY(GOOSE_SHAPE, 9 * MARGIN, 0)
+pushXY(GOOSE_SHAPE, 7 * MARGIN, -MARGIN)
+pushXY(GOOSE_SHAPE, 7 * MARGIN, -MARGIN / 2)
 
 -- line weight selector
 
 CURSOR_PTS = { }
 
-function cursorPoint(x, y)
-  CURSOR_PTS[#CURSOR_PTS + 1] = x
-  CURSOR_PTS[#CURSOR_PTS + 1] = y
-end
-
-cursorPoint(0, 0)
-cursorPoint(0, 36)
-cursorPoint(8, 28)
-cursorPoint(14, 41)
-cursorPoint(20, 38)
-cursorPoint(14, 25)
-cursorPoint(25, 25)
+pushXY(CURSOR_PTS, 0, 0)
+pushXY(CURSOR_PTS, 0, 36)
+pushXY(CURSOR_PTS, 8, 28)
+pushXY(CURSOR_PTS, 14, 41)
+pushXY(CURSOR_PTS, 20, 38)
+pushXY(CURSOR_PTS, 14, 25)
+pushXY(CURSOR_PTS, 25, 25)
 
 CURSOR_TRIS = love.math.triangulate(CURSOR_PTS)
 
@@ -685,7 +685,7 @@ function drawObjectStroke(o)
 end
 
 function drawObjectSticker(o)
-  drawSticker(o.id, o.x, o.y, STICKER_SIZE * o.scale)
+  drawSticker(o.index, o.x, o.y, STICKER_SIZE * o.scale)
 end
 
 DRAW_OBJECT = {
@@ -737,7 +737,7 @@ end
 function applySeeds()
   for i = 1, #SEEDS do
     local s = SEEDS[i]
-    placeSticker(STICKER_INDEX[s.id], s.x + COL_W, s.y, 1)
+    placeSticker(s.index, s.x + COL_W, s.y, 1)
   end
 end
 

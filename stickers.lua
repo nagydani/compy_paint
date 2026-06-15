@@ -122,20 +122,16 @@ end
 
 STICKER_SIZE = 96
 
+-- stickers are identified by their index in this list; the
+-- STK_* constants (in constants.lua) name those code refers to
+
 STICKERS = {
-  { id = "circle", draw = drawCircleSticker },
-  { id = "square", draw = drawSquareSticker },
-  { id = "star", draw = drawStarSticker },
-  { id = "tree", draw = drawTreeSticker },
-  { id = "house", draw = drawHouseSticker },
-  { id = "sun", draw = drawSunSticker },
-  { id = "flower", draw = drawFlowerSticker },
-  { id = "cloud", draw = drawCloudSticker }
+  drawCircleSticker,
+  drawSquareSticker,
+  drawStarSticker,
+  drawTreeSticker,
+  drawHouseSticker,
+  drawSunSticker,
+  drawFlowerSticker,
+  drawCloudSticker
 }
-
--- id -> index, built once so lookups are direct, not a scan
-
-STICKER_INDEX = { }
-for i = 1, #STICKERS do
-  STICKER_INDEX[STICKERS[i].id] = i
-end

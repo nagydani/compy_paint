@@ -103,6 +103,13 @@ POINTER_SPEED = 2.5
 
 CROSS_D = 12
 
+-- named sticker indices (order matches the STICKERS list)
+
+STK_STAR = 3
+STK_TREE = 4
+STK_HOUSE = 5
+STK_SUN = 6
+
 -- sticker scaling by mouse wheel: step per notch and bounds
 
 SCALE_STEP = 0.1
@@ -142,17 +149,17 @@ MENU_ICON = MENU_H * 0.6
 -- the exact coordinates open). canvas-relative coords
 
 SEED_TREE = {
-  id = "tree",
+  index = STK_TREE,
   x = CAN_W / 6,
   y = HEIGHT / 2
 }
 SEED_HOUSE = {
-  id = "house",
+  index = STK_HOUSE,
   x = CAN_W / 2,
   y = HEIGHT / 2
 }
 SEED_SUN = {
-  id = "sun",
+  index = STK_SUN,
   x = CAN_W * 5 / 6,
   y = HEIGHT * 3 / 16
 }
