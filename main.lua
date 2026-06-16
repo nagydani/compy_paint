@@ -114,17 +114,15 @@ function beginIcon(cx, cy, s)
   gfx.rotate(ICON_ANGLE)
 end
 
--- flame tip of the brush icon, rendered once at load
-
--- flame tip of the brush icon: editable control points
--- (x, y pairs), rendered to a polygon once at load
-
 -- append an x, y pair to a flat coordinate table
 
 function pushXY(t, x, y)
   t[#t + 1] = x
   t[#t + 1] = y
 end
+
+-- flame tip of the brush icon: editable control points,
+-- rendered to a polygon once at load
 
 BRUSH_TIP_PTS = { }
 
@@ -357,7 +355,7 @@ pushXY(GOOSE_SHAPE, 9 * MARGIN, 0)
 pushXY(GOOSE_SHAPE, 7 * MARGIN, -MARGIN)
 pushXY(GOOSE_SHAPE, 7 * MARGIN, -MARGIN / 2)
 
--- line weight selector
+-- own pointer arrow: triangulated fill + contrast outline
 
 CURSOR_PTS = { }
 
@@ -420,9 +418,6 @@ function getWeight()
   return aw
 end
 
--- a small center dot marks the exact action point under
--- any tool cursor
-
 -- cursor outlines are drawn twice -- a thick light pass
 -- under a thin dark pass -- so the pointer stays visible
 -- on any background or drawing
@@ -444,6 +439,8 @@ function strokeBox(r)
   gfx.setLineWidth(1)
   gfx.rectangle("line", mx - r, my - r, r * 2, r * 2)
 end
+
+-- a small center dot marks the exact action point
 
 function drawHotspot()
   gfx.setColor(Color[BRIGHT_WHITE])
@@ -767,14 +764,6 @@ function doUndo()
   replay()
 end
 
-function clearPress()
-  doClear()
-end
-
-function undoPress()
-  doUndo()
-end
-
 -- input dispatch: all actions on raw mouse events (spec)
 -- Alt+left picks the background; right button never arrives
 -- (the platform delivers it as a raw Esc, which is unbound)
@@ -794,8 +783,8 @@ addRegion(PAINT_REGIONS, inPaletteRange, setColor)
 addRegion(PAINT_REGIONS, inCanvasRange, canvasPress)
 addRegion(PAINT_REGIONS, inToolRange, setTool)
 addRegion(PAINT_REGIONS, inWeightRange, setLineWeight)
-addRegion(PAINT_REGIONS, inUndoRange, undoPress)
-addRegion(PAINT_REGIONS, inClearRange, clearPress)
+addRegion(PAINT_REGIONS, inUndoRange, doUndo)
+addRegion(PAINT_REGIONS, inClearRange, doClear)
 
 STICKER_REGIONS = { }
 addRegion(STICKER_REGIONS, inToolRange, setTool)
